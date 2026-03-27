@@ -6,20 +6,10 @@ exports[`RefreshControl Component > matches snapshot 1`] = `
 >
   <ScrollView
     refreshControl={
-      {
-        "$$typeof": Symbol(react.transitional.element),
-        "_owner": null,
-        "_store": {},
-        "key": null,
-        "props": {
-          "onRefresh": [Function],
-          "refreshing": false,
-        },
-        "type": {
-          "$$typeof": Symbol(react.forward_ref),
-          "render": [Function],
-        },
-      }
+      <RefreshControl
+        onRefresh={[Function]}
+        refreshing={false}
+      />
     }
   >
     <Text

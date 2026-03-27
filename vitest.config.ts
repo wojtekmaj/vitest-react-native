@@ -26,7 +26,6 @@ function flowRemoveTypesPlugin(): Plugin {
 }
 
 export default defineConfig({
-  // @ts-expect-error - Vite version mismatch between vitest and @vitejs/plugin-react
   plugins: [react(), flowRemoveTypesPlugin()],
   resolve: {
     extensions: [
