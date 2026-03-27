@@ -1,8 +1,11 @@
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 import type { Plugin, UserConfig } from 'vite';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url);
+const removeTypes = require('flow-remove-types');
 
 export interface VitestReactNativePluginOptions {
   /**
@@ -42,6 +45,7 @@ export function reactNative(options: VitestReactNativePluginOptions = {}): Plugi
 
   return {
     name: 'vitest-plugin-react-native',
+    enforce: 'pre',
     config(): UserConfig {
       return {
         resolve: {
@@ -53,11 +57,22 @@ export function reactNative(options: VitestReactNativePluginOptions = {}): Plugi
           globals: true,
           server: {
             deps: {
-              external: ['react-native'],
+              inline: ['react-native', /react-native/, /@react-native/],
             },
           },
         },
       } as UserConfig;
+    },
+    transform(code, id) {
+      const normalized = id.replace(/\\/g, '/');
+      if (
+        (normalized.includes('/node_modules/react-native/') ||
+          normalized.includes('/node_modules/@react-native/')) &&
+        (id.endsWith('.js') || id.endsWith('.ios.js'))
+      ) {
+        const result = removeTypes(code, { all: true }).toString();
+        return { code: result, map: null };
+      }
     },
   };
 }

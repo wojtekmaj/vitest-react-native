@@ -151,7 +151,7 @@ describe('SectionList Component', () => {
   });
 
   test('has scrollToLocation method', () => {
-    let listRef: SectionList | null = null;
+    let listRef: any = null;
     render(
       <SectionList
         ref={(ref) => {

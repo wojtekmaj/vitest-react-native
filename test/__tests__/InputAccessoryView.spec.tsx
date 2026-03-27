@@ -16,12 +16,13 @@ describe('InputAccessoryView', () => {
   });
 
   test('renders with nativeID', () => {
+    const InputAccessoryViewAny = InputAccessoryView as any;
     const { getByTestId } = render(
-      <InputAccessoryView nativeID="unique-accessory" testID="input-accessory">
+      <InputAccessoryViewAny nativeID="unique-accessory" testID="input-accessory">
         <View>
           <Text>Done</Text>
         </View>
-      </InputAccessoryView>
+      </InputAccessoryViewAny>
     );
 
     const accessoryView = getByTestId('input-accessory');
@@ -40,6 +41,7 @@ describe('InputAccessoryView', () => {
   });
 
   test('can be used with TextInput', () => {
+    const InputAccessoryViewAny = InputAccessoryView as any;
     const { getByTestId, getByText } = render(
       <View>
         <TextInput
@@ -47,11 +49,11 @@ describe('InputAccessoryView', () => {
           inputAccessoryViewID="keyboard-accessory"
           placeholder="Enter text"
         />
-        <InputAccessoryView nativeID="keyboard-accessory" testID="accessory">
+        <InputAccessoryViewAny nativeID="keyboard-accessory" testID="accessory">
           <View>
             <Text>Toolbar</Text>
           </View>
-        </InputAccessoryView>
+        </InputAccessoryViewAny>
       </View>
     );
 
@@ -61,8 +63,9 @@ describe('InputAccessoryView', () => {
   });
 
   test('renders with backgroundColor style', () => {
+    const InputAccessoryViewAny = InputAccessoryView as any;
     const { getByTestId } = render(
-      <InputAccessoryView
+      <InputAccessoryViewAny
         nativeID="styled-accessory"
         backgroundColor="#f0f0f0"
         testID="styled-accessory-view"
@@ -70,7 +73,7 @@ describe('InputAccessoryView', () => {
         <View>
           <Text>Styled</Text>
         </View>
-      </InputAccessoryView>
+      </InputAccessoryViewAny>
     );
 
     const accessoryView = getByTestId('styled-accessory-view');

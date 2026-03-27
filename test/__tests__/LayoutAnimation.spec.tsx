@@ -30,8 +30,8 @@ describe('LayoutAnimation', () => {
   });
 
   test('checkConfig is callable', () => {
-    LayoutAnimation.checkConfig({});
-    expect(LayoutAnimation.checkConfig).toHaveBeenCalled();
+    (LayoutAnimation as any).checkConfig({});
+    expect((LayoutAnimation as any).checkConfig).toHaveBeenCalled();
   });
 
   test('Types are defined', () => {
@@ -59,20 +59,20 @@ describe('LayoutAnimation', () => {
   test('Presets.easeInEaseOut is defined', () => {
     expect(LayoutAnimation.Presets.easeInEaseOut).toBeDefined();
     expect(LayoutAnimation.Presets.easeInEaseOut.duration).toBe(300);
-    expect(LayoutAnimation.Presets.easeInEaseOut.type).toBe('easeInEaseOut');
+    expect((LayoutAnimation.Presets.easeInEaseOut as any).type).toBe('easeInEaseOut');
   });
 
   test('Presets.linear is defined', () => {
     expect(LayoutAnimation.Presets.linear).toBeDefined();
     expect(LayoutAnimation.Presets.linear.duration).toBe(500);
-    expect(LayoutAnimation.Presets.linear.type).toBe('linear');
+    expect((LayoutAnimation.Presets.linear as any).type).toBe('linear');
   });
 
   test('Presets.spring is defined', () => {
     expect(LayoutAnimation.Presets.spring).toBeDefined();
     expect(LayoutAnimation.Presets.spring.duration).toBe(700);
-    expect(LayoutAnimation.Presets.spring.type).toBe('spring');
-    expect(LayoutAnimation.Presets.spring.springDamping).toBe(0.4);
+    expect((LayoutAnimation.Presets.spring as any).type).toBe('spring');
+    expect((LayoutAnimation.Presets.spring as any).springDamping).toBe(0.4);
   });
 
   test('configureNext with custom config', () => {
@@ -93,7 +93,7 @@ describe('LayoutAnimation', () => {
   test('all methods are defined', () => {
     expect(LayoutAnimation.configureNext).toBeDefined();
     expect(LayoutAnimation.create).toBeDefined();
-    expect(LayoutAnimation.checkConfig).toBeDefined();
+    expect((LayoutAnimation as any).checkConfig).toBeDefined();
     expect(LayoutAnimation.Types).toBeDefined();
     expect(LayoutAnimation.Properties).toBeDefined();
     expect(LayoutAnimation.Presets).toBeDefined();

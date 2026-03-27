@@ -115,6 +115,7 @@ describe('AccessibilityInfo', () => {
   });
 
   test('sendAccessibilityEvent is callable', () => {
+    // @ts-expect-error testing mock behavior
     AccessibilityInfo.sendAccessibilityEvent(1, 'focus');
     expect(AccessibilityInfo.sendAccessibilityEvent).toHaveBeenCalled();
   });

@@ -146,7 +146,7 @@ describe('RefreshControl Component', () => {
     const { getByTestId } = render(
       <ScrollView
         testID="scroll-view"
-        refreshControl={<RefreshControl refreshing={false} onRefresh={() => {}} size={1} />}
+        refreshControl={<RefreshControl refreshing={false} onRefresh={() => {}} size={1 as any} />}
       >
         <Text>Content</Text>
       </ScrollView>

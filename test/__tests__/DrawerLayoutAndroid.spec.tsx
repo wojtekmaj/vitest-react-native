@@ -25,9 +25,9 @@ describe('DrawerLayoutAndroid', () => {
   });
 
   test('has static positions', () => {
-    expect(DrawerLayoutAndroid.positions).toBeDefined();
-    expect(DrawerLayoutAndroid.positions.Left).toBe('left');
-    expect(DrawerLayoutAndroid.positions.Right).toBe('right');
+    expect((DrawerLayoutAndroid as any).positions).toBeDefined();
+    expect((DrawerLayoutAndroid as any).positions.Left).toBe('left');
+    expect((DrawerLayoutAndroid as any).positions.Right).toBe('right');
   });
 
   test('has openDrawer method', () => {

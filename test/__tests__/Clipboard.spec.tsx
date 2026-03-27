@@ -38,23 +38,23 @@ describe('Clipboard', () => {
   });
 
   test('hasString is callable', async () => {
-    await Clipboard.hasString();
-    expect(Clipboard.hasString).toHaveBeenCalled();
+    await (Clipboard as any).hasString();
+    expect((Clipboard as any).hasString).toHaveBeenCalled();
   });
 
   test('hasString returns a promise', () => {
-    const result = Clipboard.hasString();
+    const result = (Clipboard as any).hasString();
     expect(result).toBeInstanceOf(Promise);
   });
 
   test('hasString resolves to false', async () => {
-    const hasContent = await Clipboard.hasString();
+    const hasContent = await (Clipboard as any).hasString();
     expect(hasContent).toBe(false);
   });
 
   test('all methods are defined', () => {
     expect(Clipboard.getString).toBeDefined();
     expect(Clipboard.setString).toBeDefined();
-    expect(Clipboard.hasString).toBeDefined();
+    expect((Clipboard as any).hasString).toBeDefined();
   });
 });

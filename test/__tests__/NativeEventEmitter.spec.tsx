@@ -41,7 +41,7 @@ describe('NativeEventEmitter', () => {
   test('removeListener is callable', () => {
     const emitter = new NativeEventEmitter();
     const callback = vi.fn();
-    expect(() => emitter.removeListener('testEvent', callback)).not.toThrow();
+    expect(() => (emitter as any).removeListener('testEvent', callback)).not.toThrow();
   });
 
   test('removeAllListeners is callable', () => {
@@ -53,7 +53,7 @@ describe('NativeEventEmitter', () => {
     const emitter = new NativeEventEmitter();
     const callback = vi.fn();
     const subscription = emitter.addListener('testEvent', callback);
-    expect(() => emitter.removeSubscription(subscription)).not.toThrow();
+    expect(() => (emitter as any).removeSubscription(subscription)).not.toThrow();
   });
 
   test('emit is callable', () => {
@@ -84,9 +84,9 @@ describe('NativeEventEmitter', () => {
   test('all methods are defined', () => {
     const emitter = new NativeEventEmitter();
     expect(emitter.addListener).toBeDefined();
-    expect(emitter.removeListener).toBeDefined();
+    expect((emitter as any).removeListener).toBeDefined();
     expect(emitter.removeAllListeners).toBeDefined();
-    expect(emitter.removeSubscription).toBeDefined();
+    expect((emitter as any).removeSubscription).toBeDefined();
     expect(emitter.emit).toBeDefined();
   });
 });

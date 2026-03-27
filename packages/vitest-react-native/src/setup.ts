@@ -176,7 +176,7 @@ const getMocked = (filePath: string): MockEntry | undefined =>
 // ============================================================================
 
 const transformCode = (code: string): string => {
-  const result = removeTypes(code).toString();
+  const result = removeTypes(code, { all: true }).toString();
   return esbuild.transformSync(result, {
     loader: 'jsx',
     format: 'cjs',

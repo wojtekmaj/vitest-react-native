@@ -35,8 +35,8 @@ describe('Keyboard', () => {
 
   test('removeListener is callable', () => {
     const callback = vi.fn();
-    Keyboard.removeListener('keyboardDidShow', callback);
-    expect(Keyboard.removeListener).toHaveBeenCalled();
+    (Keyboard as any).removeListener('keyboardDidShow', callback);
+    expect((Keyboard as any).removeListener).toHaveBeenCalled();
   });
 
   test('removeAllListeners is callable', () => {
@@ -51,6 +51,7 @@ describe('Keyboard', () => {
 
   test('scheduleLayoutAnimation is callable', () => {
     const event = { duration: 250, easing: 'keyboard' };
+    // @ts-expect-error testing mock behavior
     Keyboard.scheduleLayoutAnimation(event);
     expect(Keyboard.scheduleLayoutAnimation).toHaveBeenCalledWith(event);
   });
@@ -75,7 +76,7 @@ describe('Keyboard', () => {
 
   test('all methods are defined', () => {
     expect(Keyboard.addListener).toBeDefined();
-    expect(Keyboard.removeListener).toBeDefined();
+    expect((Keyboard as any).removeListener).toBeDefined();
     expect(Keyboard.removeAllListeners).toBeDefined();
     expect(Keyboard.dismiss).toBeDefined();
     expect(Keyboard.scheduleLayoutAnimation).toBeDefined();
