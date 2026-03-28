@@ -92,4 +92,37 @@ describe('Platform', () => {
     expect(Platform.constants.reactNativeVersion.minor).toBeDefined();
     expect(Platform.constants.reactNativeVersion.patch).toBeDefined();
   });
+
+  // Issue #2: Platform.OS should be accessible via require().default pattern
+  test('Platform.OS is accessible via default export (issue #2)', () => {
+    // Simulate the pattern used by processColor.js and other RN internals:
+    // const Platform = require('../Utilities/Platform').default;
+    // Platform.OS should not be undefined
+    const PlatformModule = require('react-native/Libraries/Utilities/Platform');
+    expect(PlatformModule.default).toBeDefined();
+    expect(PlatformModule.default.OS).toBe('ios');
+    expect(PlatformModule.default.select).toBeDefined();
+  });
+
+  test('Platform properties are accessible at top level (issue #2)', () => {
+    // Also verify direct access works: require('../Utilities/Platform').OS
+    const PlatformModule = require('react-native/Libraries/Utilities/Platform');
+    expect(PlatformModule.OS).toBe('ios');
+    expect(PlatformModule.select).toBeDefined();
+  });
+
+  // Tests from PR #8: verify processColor and react-native-svg work
+  test('processColor can read Platform.OS through the compatibility shim', () => {
+    const { processColor } = require('react-native');
+    expect(() => processColor('black')).not.toThrow();
+  });
+
+  test('deep processColor import works via default export', () => {
+    const processColor = require('react-native/Libraries/StyleSheet/processColor').default;
+    expect(() => processColor('black')).not.toThrow();
+  });
+
+  test('react-native-svg can import without crashing', () => {
+    expect(() => require('react-native-svg')).not.toThrow();
+  });
 });
