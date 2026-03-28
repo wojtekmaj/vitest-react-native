@@ -69,7 +69,7 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['**/node_modules/', '**/dist/', '**/coverage/', '*.config.js', '*.config.ts', '**/build.mjs'],
+    ignores: ['**/node_modules/', '**/dist/', '**/coverage/', '*.config.js', '*.config.ts', '**/build.mjs', '**/jest-setup.js', '**/babel.config.js'],
   },
   prettier
 );

@@ -36,7 +36,7 @@ describe('JSX transform for third-party packages (issue #4)', () => {
     `;
 
     // Should transform JSX in .js files from the specified package
-    const result = (plugin.transform as Function).call(
+    const result = (plugin.transform as (...args: any[]) => any).call(
       {},
       jsxCode,
       '/project/node_modules/react-native-modal-datetime-picker/src/DateTimePickerModal.ios.js'
@@ -59,7 +59,7 @@ describe('JSX transform for third-party packages (issue #4)', () => {
     const code = `export default function foo() { return 42; }`;
 
     // Should not transform .js files from other packages
-    const result = (plugin.transform as Function).call(
+    const result = (plugin.transform as (...args: any[]) => any).call(
       {},
       code,
       '/project/node_modules/lodash/index.js'
@@ -78,7 +78,7 @@ describe('JSX transform for third-party packages (issue #4)', () => {
     const code = `export default function foo() { return 42; }`;
 
     // Should not transform .ts files
-    const result = (plugin.transform as Function).call(
+    const result = (plugin.transform as (...args: any[]) => any).call(
       {},
       code,
       '/project/node_modules/react-native-modal-datetime-picker/src/index.ts'
