@@ -738,13 +738,13 @@ mock(
   () => `(() => {
   const React = require('react');
   const Pressable = React.forwardRef((props, ref) => {
-      accessible: rest.accessible !== false,
     const { children, style, disabled, onPress, onPressIn, onPressOut, onLongPress, ...rest } = props;
     const resolvedStyle = typeof style === 'function' ? style({ pressed: false }) : style;
     const resolvedChildren = typeof children === 'function' ? children({ pressed: false }) : children;
 
     return React.createElement('Pressable', {
       ...rest,
+      accessible: rest.accessible !== false,
       style: resolvedStyle,
       ref,
       onPress: disabled ? undefined : onPress,
