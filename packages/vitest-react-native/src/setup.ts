@@ -12,52 +12,47 @@
 // ============================================================================
 
 // TurboModule proxy for native modules - React Native 0.83+ requires this
+//
+// Uses Proxy at every level so new RN releases don't break the mock:
+// - Any TurboModule name returns a mock (no hardcoded if/else per module)
+// - Any method on a module is a callable no-op (no hardcoded method lists)
+// - Any feature flag returns () => false (no hardcoded flag names)
+//
+// This eliminates the whack-a-mole pattern where each RN update adds a new
+// module/method/flag that crashes until setup.ts is manually updated.
 const createTurboModuleProxy = () => {
-  // Use a Proxy so any current or future feature flag returns () => false
-  // without needing to hardcode every flag name
-  const featureFlagsMock = new Proxy(
-    {},
-    {
-      get: (_target, prop) => {
-        if (typeof prop === 'string') {
-          return () => false;
-        }
-        return undefined;
+  // Creates a "safe" mock object where any property access returns a no-op
+  // function, and common patterns like getConstants() return empty objects.
+  const createNativeModuleMock = () =>
+    new Proxy(
+      {},
+      {
+        get: (_target, prop) => {
+          if (typeof prop !== 'string') return undefined;
+          // getConstants/getDefaultEventTypes are called at module init and
+          // must return the right shape — object and array respectively.
+          if (prop === 'getConstants' || prop === 'getConstantsForViewManager')
+            return () => ({});
+          if (prop === 'getDefaultEventTypes') return () => [];
+          // Everything else: return a no-op function
+          return () => {};
+        },
       },
-    },
-  );
-
-  // NativeUIManager mock - PaperUIManager.js calls getConstants() on it
-  const nativeUIManagerMock = {
-    getConstants: () => ({}),
-    getConstantsForViewManager: () => ({}),
-    getDefaultEventTypes: () => [],
-    lazilyLoadView: () => ({}),
-    createView: () => {},
-    updateView: () => {},
-    manageChildren: () => {},
-    setChildren: () => {},
-    configureNextLayoutAnimation: () => {},
-    measure: () => {},
-    measureInWindow: () => {},
-    measureLayout: () => {},
-    focus: () => {},
-    blur: () => {},
-    findSubviewIn: () => {},
-    dispatchViewManagerCommand: () => {},
-    setJSResponder: () => {},
-    clearJSResponder: () => {},
-  };
+    );
 
   return (name: string) => {
     if (name === 'NativeReactNativeFeatureFlagsCxx') {
-      return featureFlagsMock;
+      // Feature flags: any prop returns () => false
+      return new Proxy(
+        {},
+        {
+          get: (_target, prop) =>
+            typeof prop === 'string' ? () => false : undefined,
+        },
+      );
     }
-    if (name === 'UIManager') {
-      return nativeUIManagerMock;
-    }
-    // Return null for other native modules - they'll use JS fallbacks
-    return null;
+    // All other TurboModules: return a generic safe mock
+    return createNativeModuleMock();
   };
 };
 
