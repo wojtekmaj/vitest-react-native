@@ -13,61 +13,48 @@
 
 // TurboModule proxy for native modules - React Native 0.83+ requires this
 const createTurboModuleProxy = () => {
-  const featureFlagsMock = {
-    commonTestFlag: () => false,
-    commonTestFlagWithoutNativeImplementation: () => false,
-    cdpInteractionMetricsEnabled: () => false,
-    cxxNativeAnimatedEnabled: () => false,
-    cxxNativeAnimatedRemoveJsSync: () => false,
-    disableEarlyViewCommandExecution: () => false,
-    disableFabricCommitInCXXAnimated: () => false,
-    disableMountItemReorderingAndroid: () => false,
-    disableOldAndroidAttachmentMetricsWorkarounds: () => false,
-    disableTextLayoutManagerCacheAndroid: () => false,
-    enableAccessibilityOrder: () => false,
-    enableAccumulatedUpdatesInRawPropsAndroid: () => false,
-    enableAndroidLinearText: () => false,
-    enableAndroidTextMeasurementOptimizations: () => false,
-    enableBridgelessArchitecture: () => false,
-    enableCppPropsIteratorSetter: () => false,
-    enableCustomFocusSearchOnClippedElementsAndroid: () => false,
-    enableDestroyShadowTreeRevisionAsync: () => false,
-    enableDoubleMeasurementFixAndroid: () => false,
-    enableEagerMainQueueModulesOnIOS: () => false,
-    enableEagerRootViewAttachment: () => false,
-    enableFabricLogs: () => false,
-    enableFabricRenderer: () => false,
-    enableFontScaleChangesUpdatingLayout: () => false,
-    enableIOSTextBaselineOffsetPerLine: () => false,
-    enableIOSViewClipToPaddingBox: () => false,
-    enableImagePrefetchingAndroid: () => false,
-    enableImagePrefetchingOnUiThreadAndroid: () => false,
-    enableImmediateUpdateModeForContentOffsetChanges: () => false,
-    enableImperativeFocus: () => false,
-    enableInteropViewManagerClassLookUpOptimizationIOS: () => false,
-    enableIntersectionObserverByDefault: () => false,
-    enableKeyEvents: () => false,
-    enableLayoutAnimationsOnAndroid: () => false,
-    enableLayoutAnimationsOnIOS: () => false,
-    enableMainQueueCoordinatorOnIOS: () => false,
-    enableModuleArgumentNSNullConversionIOS: () => false,
-    enableNativeCSSParsing: () => false,
-    enableNetworkEventReporting: () => false,
-    enablePreparedTextLayout: () => false,
-    enablePropsUpdateReconciliationAndroid: () => false,
-    enableResourceTimingAPI: () => false,
-    enableSwiftUIBasedFilters: () => false,
-    enableViewCulling: () => false,
-    enableViewRecycling: () => false,
-    enableViewRecyclingForImage: () => false,
-    enableViewRecyclingForScrollView: () => false,
-    enableViewRecyclingForText: () => false,
-    enableViewRecyclingForView: () => false,
+  // Use a Proxy so any current or future feature flag returns () => false
+  // without needing to hardcode every flag name
+  const featureFlagsMock = new Proxy(
+    {},
+    {
+      get: (_target, prop) => {
+        if (typeof prop === 'string') {
+          return () => false;
+        }
+        return undefined;
+      },
+    },
+  );
+
+  // NativeUIManager mock - PaperUIManager.js calls getConstants() on it
+  const nativeUIManagerMock = {
+    getConstants: () => ({}),
+    getConstantsForViewManager: () => ({}),
+    getDefaultEventTypes: () => [],
+    lazilyLoadView: () => ({}),
+    createView: () => {},
+    updateView: () => {},
+    manageChildren: () => {},
+    setChildren: () => {},
+    configureNextLayoutAnimation: () => {},
+    measure: () => {},
+    measureInWindow: () => {},
+    measureLayout: () => {},
+    focus: () => {},
+    blur: () => {},
+    findSubviewIn: () => {},
+    dispatchViewManagerCommand: () => {},
+    setJSResponder: () => {},
+    clearJSResponder: () => {},
   };
 
   return (name: string) => {
     if (name === 'NativeReactNativeFeatureFlagsCxx') {
       return featureFlagsMock;
+    }
+    if (name === 'UIManager') {
+      return nativeUIManagerMock;
     }
     // Return null for other native modules - they'll use JS fallbacks
     return null;
@@ -322,20 +309,19 @@ mock(
 }`
 );
 
-// Feature Flags
+// Feature Flags - use Proxy to auto-handle any current or future flag
 mock(
   'react-native/src/private/featureflags/ReactNativeFeatureFlags',
-  () => `{
-  jsOnlyTestFlag: () => false,
-  animatedShouldDebounceQueueFlush: () => false,
-  animatedShouldUseSingleOp: () => false,
-  isLayoutAnimationEnabled: () => true,
-  shouldUseAnimatedObjectForTransform: () => false,
-  shouldUseSetNativePropsInFabric: () => false,
-  commonTestFlag: () => false,
-  enableFabricRenderer: () => false,
-  enableBridgelessArchitecture: () => false,
-}`
+  () => `(() => {
+  const defaults = { isLayoutAnimationEnabled: () => true };
+  return new Proxy(defaults, {
+    get: (target, prop) => {
+      if (prop in target) return target[prop];
+      if (typeof prop === 'string') return () => false;
+      return undefined;
+    },
+  });
+})()`
 );
 
 mock(
