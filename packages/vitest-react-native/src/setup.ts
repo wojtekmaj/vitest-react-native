@@ -12,64 +12,29 @@
 // ============================================================================
 
 // TurboModule proxy for native modules - React Native 0.83+ requires this
+//
+// Uses Proxy at every level so new RN releases don't break the mock:
+// - Any TurboModule name returns a mock (no hardcoded if/else per module)
+// - Any method on a module is a callable no-op (no hardcoded method lists)
+// - Any feature flag returns () => false (no hardcoded flag names)
+//
+// This eliminates the whack-a-mole pattern where each RN update adds a new
+// module/method/flag that crashes until setup.ts is manually updated.
 const createTurboModuleProxy = () => {
-  const featureFlagsMock = {
-    commonTestFlag: () => false,
-    commonTestFlagWithoutNativeImplementation: () => false,
-    cdpInteractionMetricsEnabled: () => false,
-    cxxNativeAnimatedEnabled: () => false,
-    cxxNativeAnimatedRemoveJsSync: () => false,
-    disableEarlyViewCommandExecution: () => false,
-    disableFabricCommitInCXXAnimated: () => false,
-    disableMountItemReorderingAndroid: () => false,
-    disableOldAndroidAttachmentMetricsWorkarounds: () => false,
-    disableTextLayoutManagerCacheAndroid: () => false,
-    enableAccessibilityOrder: () => false,
-    enableAccumulatedUpdatesInRawPropsAndroid: () => false,
-    enableAndroidLinearText: () => false,
-    enableAndroidTextMeasurementOptimizations: () => false,
-    enableBridgelessArchitecture: () => false,
-    enableCppPropsIteratorSetter: () => false,
-    enableCustomFocusSearchOnClippedElementsAndroid: () => false,
-    enableDestroyShadowTreeRevisionAsync: () => false,
-    enableDoubleMeasurementFixAndroid: () => false,
-    enableEagerMainQueueModulesOnIOS: () => false,
-    enableEagerRootViewAttachment: () => false,
-    enableFabricLogs: () => false,
-    enableFabricRenderer: () => false,
-    enableFontScaleChangesUpdatingLayout: () => false,
-    enableIOSTextBaselineOffsetPerLine: () => false,
-    enableIOSViewClipToPaddingBox: () => false,
-    enableImagePrefetchingAndroid: () => false,
-    enableImagePrefetchingOnUiThreadAndroid: () => false,
-    enableImmediateUpdateModeForContentOffsetChanges: () => false,
-    enableImperativeFocus: () => false,
-    enableInteropViewManagerClassLookUpOptimizationIOS: () => false,
-    enableIntersectionObserverByDefault: () => false,
-    enableKeyEvents: () => false,
-    enableLayoutAnimationsOnAndroid: () => false,
-    enableLayoutAnimationsOnIOS: () => false,
-    enableMainQueueCoordinatorOnIOS: () => false,
-    enableModuleArgumentNSNullConversionIOS: () => false,
-    enableNativeCSSParsing: () => false,
-    enableNetworkEventReporting: () => false,
-    enablePreparedTextLayout: () => false,
-    enablePropsUpdateReconciliationAndroid: () => false,
-    enableResourceTimingAPI: () => false,
-    enableSwiftUIBasedFilters: () => false,
-    enableViewCulling: () => false,
-    enableViewRecycling: () => false,
-    enableViewRecyclingForImage: () => false,
-    enableViewRecyclingForScrollView: () => false,
-    enableViewRecyclingForText: () => false,
-    enableViewRecyclingForView: () => false,
-  };
-
   return (name: string) => {
     if (name === 'NativeReactNativeFeatureFlagsCxx') {
-      return featureFlagsMock;
+      // Feature flags: any prop returns () => false
+      return new Proxy(
+        {},
+        {
+          get: (_target, prop) =>
+            typeof prop === 'string' ? () => false : undefined,
+        },
+      );
     }
-    // Return null for other native modules - they'll use JS fallbacks
+    // Return null for other native modules so TurboModuleRegistry.get()
+    // returns null and RN code uses JS fallbacks instead of broken native stubs.
+    // TurboModuleRegistry.getEnforcing() handles the null → safe mock fallback.
     return null;
   };
 };
@@ -314,28 +279,34 @@ mock(
   get: (name) => global.__turboModuleProxy ? global.__turboModuleProxy(name) : null,
   getEnforcing: (name) => {
     const module = global.__turboModuleProxy ? global.__turboModuleProxy(name) : null;
-    if (!module) {
-      return {}; // Return empty object instead of throwing
-    }
-    return module;
+    if (module) return module;
+    // Return a safe Proxy mock instead of {} so any method call
+    // (like getConstants()) is a no-op rather than a crash
+    return new Proxy({}, {
+      get: (_, prop) => {
+        if (typeof prop !== 'string') return undefined;
+        if (prop === 'getConstants' || prop === 'getConstantsForViewManager') return () => ({});
+        if (prop === 'getDefaultEventTypes') return () => [];
+        return () => {};
+      },
+    });
   },
 }`
 );
 
-// Feature Flags
+// Feature Flags - use Proxy to auto-handle any current or future flag
 mock(
   'react-native/src/private/featureflags/ReactNativeFeatureFlags',
-  () => `{
-  jsOnlyTestFlag: () => false,
-  animatedShouldDebounceQueueFlush: () => false,
-  animatedShouldUseSingleOp: () => false,
-  isLayoutAnimationEnabled: () => true,
-  shouldUseAnimatedObjectForTransform: () => false,
-  shouldUseSetNativePropsInFabric: () => false,
-  commonTestFlag: () => false,
-  enableFabricRenderer: () => false,
-  enableBridgelessArchitecture: () => false,
-}`
+  () => `(() => {
+  const defaults = { isLayoutAnimationEnabled: () => true };
+  return new Proxy(defaults, {
+    get: (target, prop) => {
+      if (prop in target) return target[prop];
+      if (typeof prop === 'string') return () => false;
+      return undefined;
+    },
+  });
+})()`
 );
 
 mock(
