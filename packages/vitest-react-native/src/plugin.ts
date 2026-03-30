@@ -1,6 +1,7 @@
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
+import { existsSync } from 'fs';
 import type { Plugin, UserConfig } from 'vite';
 import * as esbuild from 'esbuild';
 
@@ -71,6 +72,26 @@ export function reactNative(options: VitestReactNativePluginOptions = {}): Plugi
           },
         },
       } as UserConfig;
+    },
+    // Resolve extensionless imports from node_modules packages that ship
+    // TypeScript source (e.g., @d11/react-native-fast-image).
+    // Node's require() doesn't try .ts/.tsx extensions, so these fail at runtime.
+    resolveId(source, importer) {
+      if (!importer || !source.startsWith('.') || !importer.includes('node_modules')) return;
+      // Skip if source already has a file extension
+      const lastSegment = source.split('/').pop() || '';
+      if (lastSegment.includes('.')) return;
+
+      const importerDir = dirname(importer);
+      for (const ext of extensions) {
+        const candidate = resolve(importerDir, source + ext);
+        if (existsSync(candidate)) return candidate;
+      }
+      // Also try index files (e.g., ./foo → ./foo/index.ts)
+      for (const ext of extensions) {
+        const candidate = resolve(importerDir, source, 'index' + ext);
+        if (existsSync(candidate)) return candidate;
+      }
     },
     transform(code, id) {
       const normalized = id.replace(/\\/g, '/');

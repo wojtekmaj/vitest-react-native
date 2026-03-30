@@ -238,12 +238,20 @@ const mock = (modulePath: string, mockCode: string | (() => string)): void => {
 };
 
 // Helper for touchable components that should be accessible by default
+// Maps `disabled` prop to `accessibilityState.disabled` like real React Native does,
+// so @testing-library/react-native's toBeDisabled()/toBeEnabled() matchers work correctly.
 const createAccessibleTouchableMock = (displayName: string): string => `(() => {
   const React = require('react');
   const ${displayName} = React.forwardRef((props, ref) => {
+    const { disabled, accessibilityState, ...rest } = props;
+    const mergedAccessibilityState = disabled != null || accessibilityState
+      ? { ...accessibilityState, ...(disabled != null ? { disabled: !!disabled } : {}) }
+      : undefined;
     return React.createElement('${displayName}', {
-      ...props,
+      ...rest,
+      disabled,
       accessible: props.accessible !== false,
+      ...(mergedAccessibilityState ? { accessibilityState: mergedAccessibilityState } : {}),
       ref,
     }, props.children);
   });
@@ -716,9 +724,12 @@ mock(
   () => `(() => {
   const React = require('react');
   const Pressable = React.forwardRef((props, ref) => {
-    const { children, style, disabled, onPress, onPressIn, onPressOut, onLongPress, ...rest } = props;
+    const { children, style, disabled, accessibilityState, onPress, onPressIn, onPressOut, onLongPress, ...rest } = props;
     const resolvedStyle = typeof style === 'function' ? style({ pressed: false }) : style;
     const resolvedChildren = typeof children === 'function' ? children({ pressed: false }) : children;
+    const mergedAccessibilityState = disabled != null || accessibilityState
+      ? { ...accessibilityState, ...(disabled != null ? { disabled: !!disabled } : {}) }
+      : undefined;
     return React.createElement('Pressable', {
       ...rest,
       accessible: props.accessible !== false,
@@ -729,6 +740,7 @@ mock(
       onPressOut,
       onLongPress,
       disabled,
+      ...(mergedAccessibilityState ? { accessibilityState: mergedAccessibilityState } : {}),
     }, resolvedChildren);
   });
   Pressable.displayName = 'Pressable';
@@ -786,7 +798,16 @@ mock(
   () => `(() => {
   const React = require('react');
   const Switch = React.forwardRef((props, ref) => {
-    return React.createElement('Switch', { ...props, ref });
+    const { disabled, accessibilityState, ...rest } = props;
+    const mergedAccessibilityState = disabled != null || accessibilityState
+      ? { ...accessibilityState, ...(disabled != null ? { disabled: !!disabled } : {}) }
+      : undefined;
+    return React.createElement('Switch', {
+      ...rest,
+      disabled,
+      ...(mergedAccessibilityState ? { accessibilityState: mergedAccessibilityState } : {}),
+      ref,
+    });
   });
   Switch.displayName = 'Switch';
   return { __esModule: true, default: Switch };
@@ -1250,12 +1271,16 @@ mock(
   () => `(() => {
   const React = require('react');
   const Text = require('react-native/Libraries/Text/Text').default;
-  function Button({ title, onPress, disabled, testID, color, accessibilityLabel, accessibilityRole, role, accessible, ...rest }) {
+  function Button({ title, onPress, disabled, testID, color, accessibilityLabel, accessibilityState, accessibilityRole, role, accessible, ...rest }) {
+    const mergedAccessibilityState = disabled != null || accessibilityState
+      ? { ...accessibilityState, ...(disabled != null ? { disabled: !!disabled } : {}) }
+      : undefined;
     return React.createElement('Button', {
       onPress, disabled, testID, color, accessibilityLabel,
       accessibilityRole: accessibilityRole || 'button',
       role: role,
       accessible: accessible !== undefined ? accessible : true,
+      ...(mergedAccessibilityState ? { accessibilityState: mergedAccessibilityState } : {}),
       ...rest,
     },
       React.createElement(Text, null, title)
@@ -1466,9 +1491,15 @@ mock(
   const React = require('react');
   class TouchableNativeFeedback extends React.Component {
     render() {
+      const { disabled, accessibilityState, ...rest } = this.props;
+      const mergedAccessibilityState = disabled != null || accessibilityState
+        ? { ...accessibilityState, ...(disabled != null ? { disabled: !!disabled } : {}) }
+        : undefined;
       return React.createElement('TouchableNativeFeedback', {
-        ...this.props,
+        ...rest,
+        disabled,
         accessible: this.props.accessible !== false,
+        ...(mergedAccessibilityState ? { accessibilityState: mergedAccessibilityState } : {}),
       }, this.props.children);
     }
   }

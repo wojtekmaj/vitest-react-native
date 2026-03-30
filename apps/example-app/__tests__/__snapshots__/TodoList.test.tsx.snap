@@ -62,6 +62,11 @@ exports[`TodoList > matches snapshot when empty 1`] = `
       value=""
     />
     <Pressable
+      accessibilityState={
+        {
+          "disabled": true,
+        }
+      }
       accessible={true}
       disabled={true}
       ref={null}
@@ -212,6 +217,11 @@ exports[`TodoList > matches snapshot with items 1`] = `
       value=""
     />
     <Pressable
+      accessibilityState={
+        {
+          "disabled": true,
+        }
+      }
       accessible={true}
       disabled={true}
       ref={null}

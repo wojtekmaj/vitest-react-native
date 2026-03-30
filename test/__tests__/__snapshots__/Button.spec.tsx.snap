@@ -27,6 +27,11 @@ exports[`Button Component > matches snapshot with disabled 1`] = `
 >
   <Button
     accessibilityRole="button"
+    accessibilityState={
+      {
+        "disabled": true,
+      }
+    }
     accessible={true}
     disabled={true}
     onPress={[Function]}
