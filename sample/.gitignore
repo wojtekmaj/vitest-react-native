@@ -1,0 +1,17 @@
+build/
+.gradle/
+.cxx/
+.kotlin/
+.idea/
+local.properties
+*.keystore
+*.hprof
+*.iml
+DerivedData/
+xcuserdata/
+*.xcuserstate
+*.ipa
+**/.xcode.env.local
+**/Pods/
+vendor/bundle/
+.metro-health-check*
