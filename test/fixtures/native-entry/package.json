@@ -1,0 +1,14 @@
+{
+  "name": "@vitest-native-fixture/native-entry",
+  "version": "0.0.0",
+  "private": true,
+  "main": "index.js",
+  "types": "index.d.ts",
+  "react-native": "native.ts",
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*",
+    "react-router-native": "^6.30.6",
+    "styled-components": "^6.5.0"
+  }
+}

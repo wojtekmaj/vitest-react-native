@@ -1,0 +1,206 @@
+name: CI
+
+on:
+  push:
+    branches: ['*']
+  pull_request:
+    branches: [main]
+
+env:
+  HUSKY: 0
+
+jobs:
+  lint:
+    name: Static code analysis
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
+
+      - name: Run tests
+        run: biome lint
+
+  typescript:
+    name: Type checking (React Native ${{ matrix.react-native }})
+    runs-on: ubuntu-24.04-arm
+    continue-on-error: ${{ matrix.react-native != 'latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        react-native: [latest, previous, oldest, next]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Cache Yarn cache
+        uses: actions/cache@v5
+        env:
+          cache-name: yarn-cache
+        with:
+          path: ~/.yarn/berry/cache
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.cache-name }}
+
+      - name: Use Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Install Corepack
+        run: npm install -g corepack
+
+      - name: Install dependencies
+        run: yarn --immutable
+
+      - name: Override React Native version
+        run: node scripts/override-test-dependencies.ts --react-native ${{ matrix.react-native }}
+
+      - name: Build package
+        run: yarn build
+
+      - name: Run type checking
+        run: yarn tsc
+
+  format:
+    name: Formatting
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
+
+      - name: Run formatting
+        run: biome format
+
+  unit:
+    name: Unit tests (React Native ${{ matrix.react-native }}, RNTL ${{ matrix.testing-library }}, ${{ matrix.platform }})
+    runs-on: ubuntu-24.04-arm
+    continue-on-error: ${{ matrix.react-native != 'latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        react-native: [latest, previous, oldest, next]
+        platform: [ios, android]
+        testing-library: ['14']
+        include:
+          - react-native: latest
+            platform: ios
+            testing-library: '13'
+          - react-native: latest
+            platform: android
+            testing-library: '13'
+    env:
+      NATIVE_PLATFORM: ${{ matrix.platform }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Cache Yarn cache
+        uses: actions/cache@v5
+        env:
+          cache-name: yarn-cache
+        with:
+          path: ~/.yarn/berry/cache
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.cache-name }}
+
+      - name: Use Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Install Corepack
+        run: npm install -g corepack
+
+      - name: Install dependencies
+        run: yarn --immutable
+
+      - name: Install sample dependencies
+        run: yarn --cwd sample --immutable
+
+      - name: Override React Native version
+        run: node scripts/override-test-dependencies.ts --react-native ${{ matrix.react-native }} --sample
+
+      - name: Override React Native Testing Library version
+        if: matrix.testing-library == '13'
+        run: node scripts/override-test-dependencies.ts --testing-library ${{ matrix.testing-library }}.0.0
+
+      - name: Build package
+        run: yarn build
+
+      - name: Run type checking
+        if: matrix.testing-library == '13'
+        run: yarn tsc
+
+      - name: Run tests
+        run: yarn unit
+
+      - name: Run sample tests
+        if: matrix.testing-library == '14'
+        run: yarn --cwd sample test
+
+      - name: Run tests without React Native Testing Library
+        if: matrix.testing-library == '14'
+        run: node scripts/test-unit-only.ts
+
+  compatibility:
+    name: Minimum compatibility (Node.js ${{ matrix.node }}, ${{ matrix.platform }})
+    runs-on: ubuntu-24.04-arm
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['24.15.0', '26.0.0']
+        platform: [ios, android]
+    env:
+      NATIVE_PLATFORM: ${{ matrix.platform }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Cache Yarn cache
+        uses: actions/cache@v5
+        env:
+          cache-name: yarn-cache
+        with:
+          path: ~/.yarn/berry/cache
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.cache-name }}
+
+      - name: Use Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Install Corepack
+        run: npm install -g corepack
+
+      - name: Install dependencies
+        run: yarn --immutable
+
+      - name: Override Vitest and Vite versions
+        run: node scripts/override-test-dependencies.ts --minimum
+
+      - name: Build package
+        run: yarn build
+
+      - name: Run type checking
+        run: yarn tsc
+
+      - name: Run tests
+        run: yarn unit
+
+      - name: Run tests without React Native Testing Library
+        run: node scripts/test-unit-only.ts

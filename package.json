@@ -1,0 +1,104 @@
+{
+  "name": "@wojtekmaj/vitest-react-native",
+  "version": "0.1.0",
+  "description": "Run React Native unit and component tests with Vitest",
+  "type": "module",
+  "sideEffects": [
+    "./dist/setup.js"
+  ],
+  "main": "./dist/index.js",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./native-mocks": {
+      "types": "./dist/native-mocks.d.ts",
+      "default": "./dist/native-mocks.js"
+    },
+    "./setup": {
+      "types": "./dist/setup.d.ts",
+      "import": "./dist/setup.js"
+    },
+    "./testing-library": {
+      "types": "./dist/testing-library.d.ts",
+      "import": "./dist/testing-library.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "clean": "node -e \"fs.rmSync('./dist', { recursive: true, force: true })\"",
+    "format": "biome format",
+    "lint": "biome lint",
+    "postinstall": "husky",
+    "prepack": "yarn clean && yarn build",
+    "test": "yarn build && yarn lint && yarn tsc && yarn format && yarn unit",
+    "tsc": "tsc",
+    "unit": "vitest"
+  },
+  "keywords": [
+    "vitest",
+    "react-native",
+    "testing",
+    "vite-plugin"
+  ],
+  "author": {
+    "name": "Wojciech Maj",
+    "email": "kontakt@wojtekmaj.pl"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@babel/core": "^8.0.0",
+    "@babel/plugin-transform-modules-commonjs": "^8.0.0",
+    "get-tsconfig": "^4.14.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.8",
+    "@react-native/babel-preset": "0.87.0",
+    "@react-native/jest-preset": "0.87.0",
+    "@testing-library/react-native": "^14.0.0",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.7",
+    "husky": "^9.0.0",
+    "react": "19.2.3",
+    "react-native": "0.87.0",
+    "test-renderer": "1.2.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.0",
+    "vitest": "^5.0.0"
+  },
+  "peerDependencies": {
+    "@react-native/babel-preset": ">=0.85.0",
+    "@react-native/jest-preset": ">=0.85.0",
+    "@testing-library/react-native": "^13.0.0 || ^14.0.0",
+    "react-native": ">=0.85.0",
+    "vite": "^7.0.0 || ^8.0.0",
+    "vitest": "^4.0.0 || ^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@testing-library/react-native": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": "^24.15.0 || >=26.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "files": [
+    "dist/**/*",
+    "src/**/*",
+    "!**/*.spec.*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wojtekmaj/vitest-react-native.git"
+  },
+  "funding": "https://github.com/wojtekmaj/vitest-react-native?sponsor=1",
+  "packageManager": "yarn@4.17.1"
+}
