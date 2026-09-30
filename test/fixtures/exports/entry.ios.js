@@ -1,0 +1,1 @@
+module.exports = 'iOS replacement';

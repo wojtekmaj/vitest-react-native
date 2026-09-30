@@ -1,0 +1,13 @@
+{
+  "name": "@vitest-native-fixture/exports",
+  "private": true,
+  "main": "./main.js",
+  "react-native": "./legacy.js",
+  "exports": {
+    ".": {
+      "react-native": "./exported.js",
+      "default": "./main.js"
+    },
+    "./exact": "./entry.js"
+  }
+}

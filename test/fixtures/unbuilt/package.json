@@ -1,0 +1,6 @@
+{
+  "name": "@vitest-native-fixture/unbuilt",
+  "private": true,
+  "main": "./dist/index.js",
+  "react-native": "./native.js"
+}

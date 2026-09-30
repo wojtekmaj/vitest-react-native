@@ -1,0 +1,10 @@
+{
+  "name": "vitest-react-native-unit-only",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "tsc": "tsc --noEmit",
+    "unit": "vitest run"
+  },
+  "packageManager": "yarn@4.17.1"
+}

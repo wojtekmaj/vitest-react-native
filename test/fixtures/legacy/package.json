@@ -1,0 +1,5 @@
+{
+  "name": "@vitest-native-fixture/legacy",
+  "private": true,
+  "main": "./index.js"
+}
