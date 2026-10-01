@@ -1,6 +1,6 @@
 {
   "name": "@wojtekmaj/vitest-react-native",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Run React Native unit and component tests with Vitest",
   "type": "module",
   "sideEffects": [
