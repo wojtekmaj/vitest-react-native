@@ -1,3 +1,4 @@
+import type { PackageResolver } from './resolve.js';
 import type { RuntimeOptions } from './types.js';
 
 export type NativeResolverOptions = {
@@ -17,6 +18,7 @@ export type NativeRuntime = {
   require: NodeJS.Require;
   sharedModules: Map<string, string>;
   nativeRoot: string;
+  packageResolver: PackageResolver;
   extensions: string[];
   nativeResolver?: NativeResolver;
   matchTsconfigPaths?: (specifier: string) => string[];

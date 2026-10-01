@@ -11,9 +11,11 @@ type PackageManifest = {
   dependencies?: Record<string, string>;
 };
 
-export function readPackageManifest(directory: string): PackageManifest {
-  return JSON.parse(readFileSync(join(directory, 'package.json'), 'utf8')) as PackageManifest;
-}
+export type PackageResolver = {
+  findPackageDirectory: (filename: string) => string | undefined;
+  readPackageManifest: (directory: string) => PackageManifest;
+  resolvePackageDirectory: (request: string, parent: string) => string | undefined;
+};
 
 /**
  * Tries platform, native and generic files within each of Metro's default extensions.
@@ -28,42 +30,111 @@ export function getExtensions(platform: string): string[] {
 }
 
 /**
- * Locates a package independently of its main file, including unbuilt linked packages.
- * Use the caller's dependencies first, then the consuming application's dependencies.
+ * Shares package ownership and manifest lookups between the runtime's Node hooks.
+ * Caches belong to one test file so subsequent files and watch runs see fresh packages.
  */
-export function resolvePackageDirectory(
-  request: string,
-  parent: string,
-  require: NodeJS.Require,
-): string | undefined {
-  const name = request.match(/^(?:@[^/]+\/)?[^/:]+/)?.[0];
+export function createPackageResolver(require: NodeJS.Require): PackageResolver {
+  const manifests = new Map<string, PackageManifest>();
 
-  if (!name || request.startsWith('.') || request.startsWith('/') || request.includes(':')) {
-    return;
-  }
+  const owners = new Map<string, string | undefined>();
 
-  const owner = findPackageDirectory(parent);
+  const packages = new Map<string, string | undefined>();
 
-  if (owner) {
-    const manifest = readPackageManifest(owner);
+  function readPackageManifest(directory: string): PackageManifest {
+    let manifest = manifests.get(directory);
 
-    if (manifest.name === name && manifest.exports != null) {
-      return owner;
+    if (!manifest) {
+      manifest = JSON.parse(
+        readFileSync(join(directory, 'package.json'), 'utf8'),
+      ) as PackageManifest;
+      manifests.set(directory, manifest);
     }
+
+    return manifest;
   }
 
-  const directories = new Set([
-    ...(createRequire(parent).resolve.paths(name) ?? []),
-    ...(require.resolve.paths(name) ?? []),
-  ]);
+  function findPackageDirectory(filename: string): string | undefined {
+    let directory = dirname(filename);
 
-  for (const directory of directories) {
-    const candidate = join(directory, name);
+    let owner: string | undefined;
 
-    if (existsSync(join(candidate, 'package.json'))) {
-      return realpathSync(candidate);
+    const visited: string[] = [];
+
+    while (directory !== dirname(directory)) {
+      if (owners.has(directory)) {
+        owner = owners.get(directory);
+
+        break;
+      }
+
+      visited.push(directory);
+
+      if (existsSync(join(directory, 'package.json')) && readPackageManifest(directory).name) {
+        owner = directory;
+
+        break;
+      }
+
+      directory = dirname(directory);
     }
+
+    for (const visitedDirectory of visited) {
+      owners.set(visitedDirectory, owner);
+    }
+
+    return owner;
   }
+
+  function resolvePackageDirectory(request: string, parent: string): string | undefined {
+    const name = request.match(/^(?:@[^/]+\/)?[^/:]+/)?.[0];
+
+    if (!name || request.startsWith('.') || request.startsWith('/') || request.includes(':')) {
+      return;
+    }
+
+    const key = `${dirname(parent)}\0${name}`;
+
+    if (packages.has(key)) {
+      return packages.get(key);
+    }
+
+    const owner = findPackageDirectory(parent);
+
+    if (owner) {
+      const manifest = readPackageManifest(owner);
+
+      if (manifest.name === name && manifest.exports != null) {
+        packages.set(key, owner);
+
+        return owner;
+      }
+    }
+
+    const directories = new Set([
+      ...(createRequire(parent).resolve.paths(name) ?? []),
+      ...(require.resolve.paths(name) ?? []),
+    ]);
+
+    for (const directory of directories) {
+      const candidate = join(directory, name);
+
+      if (existsSync(join(candidate, 'package.json'))) {
+        const resolved = realpathSync(candidate);
+
+        packages.set(key, resolved);
+
+        return resolved;
+      }
+    }
+
+    packages.set(key, undefined);
+  }
+
+  return {
+    findPackageDirectory,
+    readPackageManifest,
+    resolvePackageDirectory,
+  };
 }
 
 /**
@@ -77,23 +148,4 @@ export function resolveFile(filename: string, extensions: string[]): string | un
   ];
 
   return candidates.find((candidate) => existsSync(candidate) && statSync(candidate).isFile());
-}
-
-/**
- * Finds the owning package, including dependencies linked outside node_modules.
- */
-export function findPackageDirectory(filename: string): string | undefined {
-  let directory = dirname(filename);
-
-  while (directory !== dirname(directory)) {
-    const manifest = join(directory, 'package.json');
-
-    if (existsSync(manifest) && JSON.parse(readFileSync(manifest, 'utf8')).name) {
-      return directory;
-    }
-
-    directory = dirname(directory);
-  }
-
-  return undefined;
 }

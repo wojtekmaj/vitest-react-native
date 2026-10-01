@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { actualPrefix, mockSuffix } from './preset.js';
-import { getExtensions } from './resolve.js';
+import { createPackageResolver, getExtensions } from './resolve.js';
 import { createResolveHook } from './resolve-module.js';
 
 import type { NativeRuntime } from './runtime-types.js';
@@ -34,6 +34,7 @@ describe('createResolveHook()', () => {
     }
 
     writeFileSync(join(root, 'package.json'), JSON.stringify({ name: 'application' }));
+
     cpSync(
       new URL('../test/fixtures/linked-consumer', import.meta.url),
       join(directory, 'linked'),
@@ -46,6 +47,7 @@ describe('createResolveHook()', () => {
       require,
       sharedModules: new Map(),
       nativeRoot: '',
+      packageResolver: createPackageResolver(require),
       extensions: getExtensions(process.env.NATIVE_PLATFORM ?? 'ios'),
       compilerDirectories: [],
       nativeSetupFiles: [],
@@ -97,6 +99,7 @@ describe('createResolveHook()', () => {
     cpSync(new URL('../test/fixtures/exports', import.meta.url), dependencyDirectory, {
       recursive: true,
     });
+
     writeFileSync(join(dependencyDirectory, 'exported.js'), "module.exports = 'linked export';");
 
     const linkedRequire: NodeJS.Require = require(join(directory, 'linked/index.js'));

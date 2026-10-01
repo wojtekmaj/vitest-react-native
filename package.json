@@ -52,7 +52,6 @@
   "license": "MIT",
   "dependencies": {
     "@babel/core": "^8.0.0",
-    "@babel/plugin-transform-modules-commonjs": "^8.0.0",
     "get-tsconfig": "^4.14.3"
   },
   "devDependencies": {

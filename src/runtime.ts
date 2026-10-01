@@ -4,7 +4,7 @@ import { createPathsMatcher, getTsconfig } from 'get-tsconfig';
 
 import { createLoadHook } from './load-module.js';
 import { configureNativePreset, installPresetApi } from './preset.js';
-import { getExtensions } from './resolve.js';
+import { createPackageResolver, getExtensions } from './resolve.js';
 import { createResolveHook } from './resolve-module.js';
 
 import type { NativeResolver, NativeRuntime } from './runtime-types.js';
@@ -63,6 +63,7 @@ export function installRuntime(root: string, options: RuntimeOptions): () => voi
     require,
     sharedModules,
     nativeRoot,
+    packageResolver: createPackageResolver(require),
     extensions,
     nativeResolver,
     matchTsconfigPaths,

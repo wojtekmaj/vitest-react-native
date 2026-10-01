@@ -51,6 +51,7 @@ describe('mockNativeModule()', () => {
 
       try {
         writeFileSync(dependency, "throw new Error('The native implementation must not load');");
+
         writeFileSync(
           setup,
           `${importStatement} from '@wojtekmaj/vitest-react-native/native-mocks';

@@ -1,11 +1,12 @@
-import { createRequire } from 'node:module';
+import { createRequire, isBuiltin } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { actualPrefix, mockSuffix, presetApiPrefix } from './preset.js';
-import { readPackageManifest, resolveFile, resolvePackageDirectory } from './resolve.js';
+import { resolveFile } from './resolve.js';
 
 import type { ResolveHookContext, ResolveHookSync } from 'node:module';
+import type { PackageResolver } from './resolve.js';
 import type { NativeRuntime } from './runtime-types.js';
 
 /**
@@ -16,6 +17,7 @@ function resolveLegacyPackage(
   request: string,
   directory: string | undefined,
   extensions: string[],
+  packageResolver: PackageResolver,
 ): string | undefined {
   if (!directory) {
     return;
@@ -28,7 +30,7 @@ function resolveLegacyPackage(
     return resolveFile(resolve(directory, `.${subpath}`), extensions);
   }
 
-  const manifest = readPackageManifest(directory);
+  const manifest = packageResolver.readPackageManifest(directory);
   const entry =
     typeof manifest['react-native'] === 'string'
       ? manifest['react-native']
@@ -50,6 +52,7 @@ export function createResolveHook(runtime: NativeRuntime): ResolveHookSync {
     require,
     sharedModules,
     nativeRoot,
+    packageResolver,
     extensions,
     nativeResolver,
     matchTsconfigPaths,
@@ -68,8 +71,8 @@ export function createResolveHook(runtime: NativeRuntime): ResolveHookSync {
     context: ResolveHookContext,
     nextResolve: Parameters<ResolveHookSync>[2],
   ): ReturnType<ResolveHookSync> {
-    const directory = resolvePackageDirectory(request, parent, require);
-    const manifest = directory ? readPackageManifest(directory) : undefined;
+    const directory = packageResolver.resolvePackageDirectory(request, parent);
+    const manifest = directory ? packageResolver.readPackageManifest(directory) : undefined;
     const nativeContext = {
       ...context,
       conditions: [
@@ -118,7 +121,7 @@ export function createResolveHook(runtime: NativeRuntime): ResolveHookSync {
           }
         }
 
-        const filename = resolveLegacyPackage(request, directory, extensions);
+        const filename = resolveLegacyPackage(request, directory, extensions, packageResolver);
 
         if (filename) {
           return { url: pathToFileURL(filename).href, shortCircuit: true };
@@ -138,7 +141,7 @@ export function createResolveHook(runtime: NativeRuntime): ResolveHookSync {
       }
     }
 
-    const filename = resolveLegacyPackage(request, directory, extensions);
+    const filename = resolveLegacyPackage(request, directory, extensions, packageResolver);
 
     return filename ? { url: pathToFileURL(filename).href, shortCircuit: true } : result;
   }
@@ -154,6 +157,10 @@ export function createResolveHook(runtime: NativeRuntime): ResolveHookSync {
 
     if (alias) {
       request = alias.replacement + request.slice(alias.find.length);
+    }
+
+    if (isBuiltin(request)) {
+      return nextResolve(request, context);
     }
 
     const parent = context.parentURL?.startsWith('file:')

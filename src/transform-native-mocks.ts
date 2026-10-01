@@ -1,9 +1,11 @@
+import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
-import { transformSync } from '@babel/core';
 
 import type { PluginObject } from '@babel/core';
 
 const nativeMocksEntry = '@wojtekmaj/vitest-react-native/native-mocks';
+
+const require = createRequire(import.meta.url);
 
 /**
  * Replaces typed mock imports with paths before JavaScript can load the dependency.
@@ -85,7 +87,9 @@ export function transformNativeMocks(code: string, filename: string): string | u
     return;
   }
 
-  const result = transformSync(code, {
+  const compiler: typeof import('@babel/core') = require('@babel/core');
+
+  const result = compiler.transformSync(code, {
     babelrc: false,
     configFile: false,
     filename,

@@ -2,8 +2,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import { mockSuffix, presetApiPrefix } from './preset.js';
-import { findPackageDirectory, readPackageManifest } from './resolve.js';
-import { transformNative } from './transform.js';
+import { createNativeTransformer } from './transform.js';
 
 import type { LoadHookSync } from 'node:module';
 import type { NativeRuntime } from './runtime-types.js';
@@ -12,10 +11,21 @@ import type { NativeRuntime } from './runtime-types.js';
  * Supplies virtual native mocks and Babel-compiled sources to Node's synchronous loader.
  */
 export function createLoadHook(runtime: NativeRuntime): LoadHookSync {
-  const { root, options, compilerDirectories, nativeSetupFiles, loadedFiles } = runtime;
+  const { root, options, compilerDirectories, nativeSetupFiles, loadedFiles, packageResolver } =
+    runtime;
+
   const packageCache = new Map<string, boolean>();
 
+  const transformNative = createNativeTransformer(root, options.babelPlugins);
+
+  let compiling = false;
+
   return (url, context, nextLoad) => {
+    // Babel's dependencies may expose native entries; never compile the compiler itself
+    if (compiling) {
+      return nextLoad(url, context);
+    }
+
     if (url.startsWith(presetApiPrefix)) {
       const parent = decodeURIComponent(url.slice(presetApiPrefix.length));
 
@@ -48,13 +58,15 @@ export function createLoadHook(runtime: NativeRuntime): LoadHookSync {
     }
 
     const normalized = filename.replaceAll('\\', '/');
-    const packageDirectory = findPackageDirectory(filename);
+
+    const packageDirectory = packageResolver.findPackageDirectory(filename);
+
     let nativePackage = false;
 
     // Inspect each package once; native libraries frequently ship raw source
     if (packageDirectory) {
       if (!packageCache.has(packageDirectory)) {
-        const manifest = readPackageManifest(packageDirectory);
+        const manifest = packageResolver.readPackageManifest(packageDirectory);
 
         packageCache.set(
           packageDirectory,
@@ -97,16 +109,17 @@ export function createLoadHook(runtime: NativeRuntime): LoadHookSync {
     ) {
       loadedFiles.add(filename);
 
-      return {
-        format: 'commonjs',
-        shortCircuit: true,
-        source: transformNative(
-          readFileSync(filename, 'utf8'),
-          filename,
-          root,
-          options.babelPlugins,
-        ),
-      };
+      compiling = true;
+
+      try {
+        return {
+          format: 'commonjs',
+          shortCircuit: true,
+          source: transformNative(readFileSync(filename, 'utf8'), filename),
+        };
+      } finally {
+        compiling = false;
+      }
     }
 
     return nextLoad(url, context);
