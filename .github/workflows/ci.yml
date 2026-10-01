@@ -82,7 +82,7 @@ jobs:
         run: biome format
 
   unit:
-    name: Unit tests (React Native ${{ matrix.react-native }}, RNTL ${{ matrix.testing-library }}, ${{ matrix.platform }})
+    name: Unit tests (React Native ${{ matrix.react-native }}, RNTL ${{ matrix.testing-library }}, Babel ${{ matrix.babel }}, ${{ matrix.platform }})
     runs-on: ubuntu-24.04-arm
     continue-on-error: ${{ matrix.react-native != 'latest' }}
     strategy:
@@ -91,13 +91,24 @@ jobs:
         react-native: [latest, previous, oldest, next]
         platform: [ios, android]
         testing-library: ['14']
+        babel: ['^8.0.0']
         include:
           - react-native: latest
             platform: ios
             testing-library: '13'
+            babel: '^8.0.0'
           - react-native: latest
             platform: android
             testing-library: '13'
+            babel: '^8.0.0'
+          - react-native: latest
+            platform: ios
+            testing-library: '14'
+            babel: '^7.0.0'
+          - react-native: latest
+            platform: android
+            testing-library: '14'
+            babel: '^7.0.0'
     env:
       NATIVE_PLATFORM: ${{ matrix.platform }}
 
@@ -136,11 +147,13 @@ jobs:
         if: matrix.testing-library == '13'
         run: node scripts/override-test-dependencies.ts --testing-library ${{ matrix.testing-library }}.0.0
 
+      - name: Override Babel version
+        run: node scripts/override-test-dependencies.ts --babel ${{ matrix.babel }}
+
       - name: Build package
         run: yarn build
 
       - name: Run type checking
-        if: matrix.testing-library == '13'
         run: yarn tsc
 
       - name: Run tests

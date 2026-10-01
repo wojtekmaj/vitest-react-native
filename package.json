@@ -51,7 +51,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@babel/core": "^8.0.0",
+    "@babel/core": "^7.0.0 || ^8.0.0",
     "get-tsconfig": "^4.14.3"
   },
   "devDependencies": {
@@ -59,6 +59,7 @@
     "@react-native/babel-preset": "0.87.0",
     "@react-native/jest-preset": "0.87.0",
     "@testing-library/react-native": "^14.0.0",
+    "@types/babel__core": "^7.20.5",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
     "husky": "^9.0.0",

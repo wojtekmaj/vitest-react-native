@@ -1,7 +1,7 @@
 import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 
-import type { PluginObject } from '@babel/core';
+import type { PluginPass, Visitor } from '@babel/core';
 
 const nativeMocksEntry = '@wojtekmaj/vitest-react-native/native-mocks';
 
@@ -11,8 +11,23 @@ const require = createRequire(import.meta.url);
  * Replaces typed mock imports with paths before JavaScript can load the dependency.
  * Inspect import bindings so aliases work and unrelated functions stay unchanged.
  */
-export function createNativeMocksPlugin(): PluginObject {
+export function createNativeMocksPlugin(api: { version: string }): {
+  manipulateOptions: (
+    options: unknown,
+    parserOptions: { plugins?: (string | [string, object])[] },
+  ) => void;
+  visitor: Visitor<PluginPass>;
+} {
   return {
+    manipulateOptions(_options, parserOptions) {
+      if (!api.version.startsWith('7.')) {
+        return;
+      }
+
+      // Babel 7.0 requires the dynamic import syntax flag
+      parserOptions.plugins ??= [];
+      parserOptions.plugins.push('dynamicImport');
+    },
     visitor: {
       CallExpression(path, state) {
         const callee = path.get('callee');
@@ -57,11 +72,19 @@ export function createNativeMocksPlugin(): PluginObject {
 
         const argument = path.get('arguments')[0];
 
-        if (!argument?.isImportExpression()) {
+        if (!argument) {
           return;
         }
 
-        const source = argument.get('source');
+        const source = argument.isImportExpression?.()
+          ? argument.get('source')
+          : argument.isCallExpression() && argument.get('callee').isImport()
+            ? argument.get('arguments')[0]
+            : undefined;
+
+        if (!source) {
+          return;
+        }
 
         if (!source.isStringLiteral()) {
           throw argument.buildCodeFrameError('Pass a literal import(...) to mockNativeModule');

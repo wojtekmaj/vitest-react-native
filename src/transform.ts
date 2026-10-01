@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 import { createNativeMocksPlugin } from './transform-native-mocks.js';
 
-import type { PluginObject } from '@babel/core';
+import type { PluginPass, Visitor } from '@babel/core';
 
 const transformerSource = readFileSync(fileURLToPath(import.meta.url), 'utf8');
 
@@ -67,7 +67,7 @@ export function createNativeTransformer(
 
   let usesPresetApi = false;
 
-  function createPresetApiPlugin(): PluginObject {
+  function createPresetApiPlugin(): { visitor: Visitor<PluginPass> } {
     return {
       visitor: {
         ReferencedIdentifier(path) {

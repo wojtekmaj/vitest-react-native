@@ -16,6 +16,7 @@ const require = createRequire(import.meta.url);
 
 const { values } = parseArgs({
   options: {
+    babel: { type: 'string' },
     'react-native': { type: 'string' },
     'testing-library': { type: 'string' },
     minimum: { type: 'boolean' },
@@ -33,6 +34,10 @@ function runYarn(args: string[]): void {
 
 function readPackageManifest(name: string): PackageManifest {
   return JSON.parse(readFileSync(require.resolve(`${name}/package.json`), 'utf8'));
+}
+
+if (values.babel) {
+  runYarn(['up', `@babel/core@${values.babel}`]);
 }
 
 if (values['react-native']) {
