@@ -10,22 +10,10 @@
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./native-mocks": {
-      "types": "./dist/native-mocks.d.ts",
-      "default": "./dist/native-mocks.js"
-    },
-    "./setup": {
-      "types": "./dist/setup.d.ts",
-      "import": "./dist/setup.js"
-    },
-    "./testing-library": {
-      "types": "./dist/testing-library.d.ts",
-      "import": "./dist/testing-library.js"
-    },
+    ".": "./dist/index.js",
+    "./native-mocks": "./dist/native-mocks.js",
+    "./setup": "./dist/setup.js",
+    "./testing-library": "./dist/testing-library.js",
     "./package.json": "./package.json"
   },
   "scripts": {
