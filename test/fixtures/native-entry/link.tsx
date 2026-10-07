@@ -1,5 +1,5 @@
 import { Pressable, Text } from 'react-native';
-import { useNavigate } from 'react-router-native';
+import { useNavigate } from 'react-router';
 
 export default function NativeLink() {
   const navigate = useNavigate();

@@ -1665,13 +1665,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remix-run/router@npm:1.23.4":
-  version: 1.23.4
-  resolution: "@remix-run/router@npm:1.23.4"
-  checksum: 10c0/ef17eb2a606c125f09c55683585099725421af1c11f1c1d1c3841fe4eea3f99eb56b26ecbb17429a173c704ecae336c37e0d74855faa9330667433ef4f419436
-  languageName: node
-  linkType: hard
-
 "@rolldown/binding-android-arm-eabi@npm:1.2.11":
   version: 1.2.11
   resolution: "@rolldown/binding-android-arm-eabi@npm:1.2.11"
@@ -2168,13 +2161,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ungap/url-search-params@npm:^0.2.2":
-  version: 0.2.2
-  resolution: "@ungap/url-search-params@npm:0.2.2"
-  checksum: 10c0/0ee84b8eff65b8f2af187d8487226c6358da2bd4f9036dea317fb5859c03dfbe1799864ade13127ba3d0b7069187c56a37596481983812e62929d8103e071690
-  languageName: node
-  linkType: hard
-
 "@vitejs/plugin-react@npm:^6.1.1":
   version: 6.1.1
   resolution: "@vitejs/plugin-react@npm:6.1.1"
@@ -2202,7 +2188,7 @@ __metadata:
   peerDependencies:
     react: "*"
     react-native: "*"
-    react-router-native: ^6.30.6
+    react-router: ^7.18.0
     styled-components: ^6.5.0
   languageName: node
   linkType: soft
@@ -2981,6 +2967,13 @@ __metadata:
   version: 2.0.0
   resolution: "convert-source-map@npm:2.0.0"
   checksum: 10c0/8f2f7a27a1a011cc6cc88cc4da2d7d0cfa5ee0369508baae3d98c260bb3ac520691464e5bbe4ae7cdf09860c1d69ecc6f70c63c6e7c7f7e3f18ec08484dc7d9b
+  languageName: node
+  linkType: hard
+
+"cookie@npm:^1.0.1":
+  version: 1.1.1
+  resolution: "cookie@npm:1.1.1"
+  checksum: 10c0/79c4ddc0fcad9c4f045f826f42edf54bcc921a29586a4558b0898277fa89fb47be95bc384c2253f493af7b29500c830da28341274527328f18eba9f58afa112c
   languageName: node
   linkType: hard
 
@@ -5498,27 +5491,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-native@npm:^6.30.6":
-  version: 6.30.6
-  resolution: "react-router-native@npm:6.30.6"
+"react-router@npm:7.18.0":
+  version: 7.18.0
+  resolution: "react-router@npm:7.18.0"
   dependencies:
-    "@ungap/url-search-params": "npm:^0.2.2"
-    react-router: "npm:6.30.6"
+    cookie: "npm:^1.0.1"
+    set-cookie-parser: "npm:^2.6.0"
   peerDependencies:
-    react: ">=16.8"
-    react-native: ">=0.44"
-  checksum: 10c0/f6a2049e6d6e3deb8ceb0c047ecd4a9d3284a91bc4689589c437e9eba560cfc2d02bad60fc8cc9fe860dee8fba6fb39b01f78ba37a9c137211bed3fbc1bfe89e
-  languageName: node
-  linkType: hard
-
-"react-router@npm:6.30.6":
-  version: 6.30.6
-  resolution: "react-router@npm:6.30.6"
-  dependencies:
-    "@remix-run/router": "npm:1.23.4"
-  peerDependencies:
-    react: ">=16.8"
-  checksum: 10c0/d101388d92a44e159ef30dd2402a7f7b6aace8f837bb42aed1f8a6b3a4eff769d1822bf69382f0acb85a790628dac081c22bedb2bca12707e0e5e91427010fc3
+    react: ">=18"
+    react-dom: ">=18"
+  peerDependenciesMeta:
+    react-dom:
+      optional: true
+  checksum: 10c0/7ab6c6dc7efdc14092486d63f55b04f9e3ef269fdec8c695a513f69e55d02a9beab8f637a13396952815d85accf16e7db2d65d9cbb68def13c349be82ceb5aee
   languageName: node
   linkType: hard
 
@@ -5828,6 +5813,13 @@ __metadata:
   version: 2.0.0
   resolution: "set-blocking@npm:2.0.0"
   checksum: 10c0/9f8c1b2d800800d0b589de1477c753492de5c1548d4ade52f57f1d1f5e04af5481554d75ce5e5c43d4004b80a3eb714398d6907027dc0534177b7539119f4454
+  languageName: node
+  linkType: hard
+
+"set-cookie-parser@npm:^2.6.0":
+  version: 2.7.2
+  resolution: "set-cookie-parser@npm:2.7.2"
+  checksum: 10c0/4381a9eb7ee951dfe393fe7aacf76b9a3b4e93a684d2162ab35594fa4053cc82a4d7d7582bf397718012c9adcf839b8cd8f57c6c42901ea9effe33c752da4a45
   languageName: node
   linkType: hard
 
@@ -6626,7 +6618,7 @@ __metadata:
     react-native-svg: "npm:^15.15.5"
     react-native-webview: "npm:^14.0.1"
     react-native-worklets: "npm:^0.13.0"
-    react-router-native: "npm:^6.30.6"
+    react-router: "npm:7.18.0"
     styled-components: "npm:^6.5.0"
     test-renderer: "npm:1.2.0"
     typescript: "npm:^7.0.2"
