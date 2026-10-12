@@ -1,6 +1,7 @@
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { getAssetId } from './assets.js';
 import { getExtensions } from './resolve.js';
 import { transformApplication } from './transform.js';
 import { transformNativeMocks } from './transform-native-mocks.js';
@@ -97,7 +98,9 @@ export default function reactNative(options: ReactNativeOptions = {}): Plugin {
     },
     async resolveId(source, importer) {
       if (/\.(?:svg|png|jpe?g|gif|webp|avif|mp3|mp4|ttf|otf|woff2?)$/.test(source)) {
-        return `\0vitest-react-native:asset:${source}`;
+        const resolved = await this.resolve(source, importer, { skipSelf: true });
+
+        return resolved ? `\0vitest-react-native:asset:${resolved.id}` : null;
       }
 
       if (
@@ -115,7 +118,7 @@ export default function reactNative(options: ReactNativeOptions = {}): Plugin {
       if (id.startsWith('\0vitest-react-native:asset:')) {
         return id.endsWith('.svg')
           ? "export { View as default } from 'react-native';"
-          : 'export default 1;';
+          : `export default ${getAssetId(id.slice('\0vitest-react-native:asset:'.length))};`;
       }
     },
   };

@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
+import { getAssetId } from './assets.js';
 import { mockSuffix, presetApiPrefix } from './preset.js';
 import { createNativeTransformer } from './transform.js';
 
@@ -97,7 +98,7 @@ export function createLoadHook(runtime: NativeRuntime): LoadHookSync {
         shortCircuit: true,
         source: filename.endsWith('.svg')
           ? "module.exports = require('react-native').View;"
-          : 'module.exports = 1;',
+          : `module.exports = ${getAssetId(filename)};`,
       };
     }
 
