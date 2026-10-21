@@ -18,7 +18,11 @@ const directory = mkdtempSync(join(tmpdir(), 'vitest-react-native-unit-only-'));
 function runYarn(args: string[]): void {
   const result = spawnSync('corepack', ['yarn', ...args], {
     cwd: directory,
-    env: { ...process.env, YARN_ENABLE_IMMUTABLE_INSTALLS: 'false' },
+    env: {
+      ...process.env,
+      YARN_ENABLE_IMMUTABLE_INSTALLS: 'false',
+      YARN_NPM_PREAPPROVED_PACKAGES: `vite@${require('vite/package.json').version}`,
+    },
     stdio: 'inherit',
   });
 
