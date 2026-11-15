@@ -51,21 +51,21 @@ Ruby and CocoaPods lockfiles, the shared Xcode workspace, and CocoaPods' project
 
 ## What the suite exercises
 
-| Library | Behavior under test |
-| --- | --- |
-| React Navigation, bottom tabs | Navigate after persisting an animated screen's counter |
-| React Navigation native stack, Screens | Navigate using the real stack and screen components |
-| Reanimated, Worklets | Compile worklets and advance a real JS test animation with Vitest timers |
-| Gesture Handler | Dispatch pan gesture events and update a native view |
-| Safe Area Context, SVG | Render the composite application with safe area contexts and native SVG components |
-| FlashList | Render and update list data |
-| AsyncStorage | Persist and read values with the vendor memory implementation |
-| MMKV | Update a subscribed native component using the library's own test storage |
-| Zustand | Share state between a native view and the store |
-| NetInfo | Render the connection state from the vendor native boundary mock |
-| WebView | Deliver a native message event to the application callback |
-| styled-components | Share a theme across ESM application and CommonJS linked dependency |
-| React Router Native | Share navigation context across the same module boundary |
+| Library                                | Behavior under test                                                                |
+| -------------------------------------- | ---------------------------------------------------------------------------------- |
+| React Navigation, bottom tabs          | Navigate after persisting an animated screen's counter                             |
+| React Navigation native stack, Screens | Navigate using the real stack and screen components                                |
+| Reanimated, Worklets                   | Compile worklets and advance a real JS test animation with Vitest timers           |
+| Gesture Handler                        | Dispatch pan gesture events and update a native view                               |
+| Safe Area Context, SVG                 | Render the composite application with safe area contexts and native SVG components |
+| FlashList                              | Render and update list data                                                        |
+| AsyncStorage                           | Persist and read values with the vendor memory implementation                      |
+| MMKV                                   | Update a subscribed native component using the library's own test storage          |
+| Zustand                                | Share state between a native view and the store                                    |
+| NetInfo                                | Render the connection state from the vendor native boundary mock                   |
+| WebView                                | Deliver a native message event to the application callback                         |
+| styled-components                      | Share a theme across ESM application and CommonJS linked dependency                |
+| React Router Native                    | Share navigation context across the same module boundary                           |
 
 `src/resolution.spec.tsx` also checks `react-native` entry points, CommonJS consumers, platform files, portals and a dependency that ships uncompiled JSX. The application uses the React Vite plugin alongside native dependency compilation.
 

@@ -117,13 +117,13 @@ reactNative({
 });
 ```
 
-| Option | Type | Default | Purpose |
-| --- | --- | --- | --- |
-| `platform` | `'ios' \| 'android'` | `'ios'` | Select platform files, with `.native` and generic files as fallbacks. |
-| `babelPlugins` | `string[]` | `[]` | Additional Babel plugins for application sources and native dependencies, such as Worklets. |
-| `nativeResolver` | `string` | None | A library's synchronous test resolver, such as Reanimated's resolver. Receives `basedir`, `extensions` and `defaultResolver`. |
-| `nativeSetupFiles` | `string[]` | `[]` | Vendor setup files evaluated before application setup files. Relative paths start at the Vitest project root. |
-| `transformPackages` | `string[]` | `[]` | Additional packages that ship uncompiled JavaScript. Native packages and TypeScript dependencies are recognized automatically. |
+| Option              | Type                 | Default | Purpose                                                                                                                        |
+| ------------------- | -------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `platform`          | `'ios' \| 'android'` | `'ios'` | Select platform files, with `.native` and generic files as fallbacks.                                                          |
+| `babelPlugins`      | `string[]`           | `[]`    | Additional Babel plugins for application sources and native dependencies, such as Worklets.                                    |
+| `nativeResolver`    | `string`             | None    | A library's synchronous test resolver, such as Reanimated's resolver. Receives `basedir`, `extensions` and `defaultResolver`.  |
+| `nativeSetupFiles`  | `string[]`           | `[]`    | Vendor setup files evaluated before application setup files. Relative paths start at the Vitest project root.                  |
+| `transformPackages` | `string[]`           | `[]`    | Additional packages that ship uncompiled JavaScript. Native packages and TypeScript dependencies are recognized automatically. |
 
 See the sample's [configuration](sample/vitest.config.ts), [native setup](sample/native.setup.ts) and [test setup](sample/vitest.setup.ts) for a complete Reanimated and Worklets example.
 
